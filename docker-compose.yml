@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  gql:
+    build:
+      context: .
+    container_name: gql
+    tty: true
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./:/go/src/
+      - ./go.mod:/go/src/go.mod
+      - ./go.sum:/go/src/go.sum
+    networks:
+      star-network:
+networks:
+  star-network:
+    external: false

@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"fmt"
@@ -19,8 +19,9 @@ const (
 	defaultClientPort  = "3000"
 )
 
-func main() {
+func Server() {
 	port := os.Getenv("STAR_GRAPHQL_PORT")
+
 	if port == "" {
 		port = defaultGraphqlPort
 	}
@@ -61,9 +62,9 @@ func main() {
 		AllowCredentials: true,
 	})
 
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	http.Handle("/query", c.Handler(srv))
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	if err = http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 		return

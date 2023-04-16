@@ -1,28 +1,71 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/AI1411/go-gql-server/graph"
+	"github.com/rs/cors"
+
+	generated "github.com/AI1411/go-gql-server/graph"
+	grpcClient "github.com/AI1411/go-gql-server/graph/grpc"
+	"github.com/AI1411/go-gql-server/graph/resolver"
 )
 
-const defaultPort = "8080"
+const (
+	defaultGraphqlPort = "8081"
+	defaultClientPort  = "3000"
+)
 
 func main() {
-	port := os.Getenv("PORT")
+	port := os.Getenv("STAR_GRAPHQL_PORT")
 	if port == "" {
-		port = defaultPort
+		port = defaultGraphqlPort
 	}
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	userClient, err := grpcClient.ConnectUserServiceClient()
+	if err != nil {
+		log.Fatalf("failed to connect to user server: %v", err)
+	}
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	tweetClient, err := grpcClient.ConnectTweetServiceClient()
+	if err != nil {
+		log.Fatalf("failed to connect to tweet server: %v", err)
+	}
+
+	chatClient, err := grpcClient.ConnectChatServiceClient()
+	if err != nil {
+		log.Fatalf("failed to connect to chat server: %v", err)
+	}
+
+	roomClient, err := grpcClient.ConnectRoomServiceClient()
+	if err != nil {
+		log.Fatalf("failed to connect to room server: %v", err)
+	}
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{
+		UserClient:  userClient,
+		TweetClient: tweetClient,
+		ChatClient:  chatClient,
+		RoomClient:  roomClient,
+	}}))
+
+	if os.Getenv("STAR_CLIENT_PORT") == "" {
+		os.Setenv("STAR_CLIENT_PORT", defaultClientPort)
+	}
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{fmt.Sprintf("http://localhost:%s", os.Getenv("STAR_CLIENT_PORT"))},
+		AllowCredentials: true,
+	})
+
+	http.Handle("/query", c.Handler(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	if err = http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+		return
+	}
 }

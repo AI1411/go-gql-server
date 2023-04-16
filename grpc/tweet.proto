@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = '/grpc';
+
+package tweet.v1;
+
+// つぶやきのCRUD操作に対応するservice型
+service TweetService {
+  rpc ListTweet(google.protobuf.Empty) returns (ListTweetResponse);
+  // つぶやきを作成するメソッド
+  rpc CreateTweet(CreateTweetRequest) returns (CreateTweetResponse);
+}
+
+// つぶやき情報を表すmessage型
+message Tweet {
+  string id = 1; // つぶやきの一意なID (UUID)
+  string user_id = 2; // つぶやきを投稿したユーザーのID (UUID)
+  string body = 3; // つぶやきの本文
+  google.protobuf.Timestamp created_at = 4; // つぶやき作成日時
+  google.protobuf.Timestamp updated_at = 5; // つぶやき情報更新日時
+}
+
+
+message ListTweetResponse {
+  repeated Tweet tweets = 1; // つぶやきのリスト
+}
+
+// つぶやきを作成するためのリクエストmessage型
+message CreateTweetRequest {
+  string user_id = 1; // つぶやきを投稿するユーザーのID
+  string body = 2; // つぶやきの本文
+}
+
+// つぶやきを作成した結果を返すレスポンスmessage型
+message CreateTweetResponse {
+  string id = 1; // 作成されたつぶやきのID
+}

@@ -1,0 +1,202 @@
+syntax = 'proto3';
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+import "grpc/hobby.proto";
+
+option go_package = '/grpc';
+
+package user.v1;
+
+service UserService {
+  rpc GetUser (GetUserRequest) returns (GetUserResponse) {}
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
+  rpc UpdateUserProfile (UpdateUserProfileRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateUserStatus (UpdateUserStatusRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateUserPassword (UpdateUserPasswordRequest) returns (google.protobuf.Empty) {}
+  rpc UploadUserImage (UploadUserImageRequest) returns (google.protobuf.Empty) {}
+
+  // auth
+  rpc Login (LoginRequest) returns (LoginResponse) {}
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {}
+
+  // user_hobby
+  rpc GetUserHobbies (GetUserHobbiesRequest) returns (GetUserHobbiesResponse) {}
+  rpc RegisterUserHobby (RegisterUserHobbyRequest) returns (RegisterUserHobbyResponse) {}
+  rpc DeleteUserHobby (DeleteUserHobbyRequest) returns (google.protobuf.Empty) {}
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+  Prefecture prefecture = 4;
+  string introduction = 5;
+  BloodType blood_type = 6;
+}
+
+message CreateUserResponse {
+  string id = 1;
+}
+
+message UpdateUserProfileRequest {
+  string id = 1;
+  string username = 2;
+  Prefecture prefecture = 3;
+  string introduction = 4;
+  BloodType blood_type = 5;
+}
+
+message UpdateUserStatusRequest {
+  string id = 1;
+  Status status = 2;
+}
+
+message UpdateUserPasswordRequest {
+  string id = 1;
+  string password = 2; // 新しいパスワード
+  string password_confirmation = 3; // 新しいパスワードの確認
+}
+
+message UploadUserImageRequest {
+  string user_id = 1;
+  string image = 2;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+}
+
+message LogoutRequest {
+  string token = 1;
+  string user_id = 2;
+}
+
+message GetUserHobbiesRequest {
+  string user_id = 1;
+}
+
+message GetUserHobbiesResponse {
+  repeated hobby.v1.Hobby hobbies = 1;
+}
+
+message RegisterUserHobbyRequest {
+  string user_id = 1;
+  string hobby_id = 2;
+}
+
+message RegisterUserHobbyResponse {
+  string id = 1;
+}
+
+message DeleteUserHobbyRequest {
+  string user_id = 1;
+  string hobby_id = 2;
+}
+
+message BanReportedUserRequest {
+  repeated string user_ids = 1;
+}
+
+message User {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string password = 4;
+  Status status = 5;
+  Prefecture prefecture = 6;
+  string introduction = 7;
+  BloodType blood_type = 8;
+  string Image = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message UserHobby {
+  string id = 1;
+  string user_id = 2;
+  string hobby_id = 3;
+}
+
+enum Status {
+  STATUS_NULL = 0;
+  ACTIVE = 1;
+  RESIGNED = 2;
+  BANDED = 3;
+  PREMIUM = 4;
+}
+
+// 都道府県情報を表すenum型
+enum Prefecture {
+  PREFECTURE_NULL = 0;
+  HOKKAIDO = 1;
+  AOMORI = 2;
+  IWATE = 3;
+  MIYAGI = 4;
+  AKITA = 5;
+  YAMAGATA = 6;
+  FUKUSHIMA = 7;
+  IBARAKI = 8;
+  TOCHIGI = 9;
+  GUNMA = 10;
+  SAITAMA = 11;
+  CHIBA = 12;
+  TOKYO = 13;
+  KANAGAWA = 14;
+  NIIGATA = 15;
+  TOYAMA = 16;
+  ISHIKAWA = 17;
+  FUKUI = 18;
+  YAMANASHI = 19;
+  NAGANO = 20;
+  GIFU = 21;
+  SHIZUOKA = 22;
+  AICHI = 23;
+  MIE = 24;
+  SHIGA = 25;
+  KYOTO = 26;
+  OSAKA = 27;
+  HYOGO = 28;
+  NARA = 29;
+  WAKAYAMA = 30;
+  TOTTORI = 31;
+  SHIMANE = 32;
+  OKAYAMA = 33;
+  HIROSHIMA = 34;
+  YAMAGUCHI = 35;
+  TOKUSHIMA = 36;
+  KAGAWA = 37;
+  EHIME = 38;
+  KOCHI = 39;
+  FUKUOKA = 40;
+  SAGA = 41;
+  NAGASAKI = 42;
+  KUMAMOTO = 43;
+  OITA = 44;
+  MIYAZAKI = 45;
+  KAGOSHIMA = 46;
+  OKINAWA = 47;
+  OVERSEAS = 48;
+}
+
+enum BloodType {
+  BLOOD_TYPE_NULL = 0;
+  A = 1;
+  B = 2;
+  O = 3;
+  AB = 4;
+}

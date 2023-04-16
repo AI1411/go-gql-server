@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "grpc/chat.proto";
+
+option go_package = '/grpc';
+
+package room.v1;
+
+service RoomService {
+  rpc GetRoom(GetRoomRequest) returns (GetRoomResponse);
+  rpc ListRoom(ListRoomRequest) returns (ListRoomResponse);
+  rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse);
+  rpc DeleteRoom(DeleteRoomRequest) returns (google.protobuf.Empty);
+}
+
+// チャットルーム情報を表すmessage型
+message Room {
+  string id = 1; // チャットルームの一意なID
+  string user_id = 2; // チャットルームの名前
+  google.protobuf.Timestamp created_at = 3; // チャットルーム作成日時
+  google.protobuf.Timestamp updated_at = 4; // チャットルーム情報更新日時
+}
+
+message ListRoomRequest {
+  string user_id = 1; // 取得するチャットルームの最大数
+}
+
+message ListRoomResponse {
+  repeated Room rooms = 1; // 取得されたチャットルームの情報
+}
+
+message GetRoomRequest {
+  string id = 1; // チャットルームの一意なID
+}
+
+message GetRoomResponse {
+  Room room = 1; // 取得されたチャットルームの情報
+  repeated chat.v1.Chat chats = 2; // 取得されたチャットルームのチャット情報
+}
+
+message CreateRoomRequest {
+  string user_id = 1; // ユーザID
+}
+
+message CreateRoomResponse {
+  string id = 1; // 作成されたチャットルームのID
+}
+
+message DeleteRoomRequest {
+  string id = 1; // チャットルームのID
+}
